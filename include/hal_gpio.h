@@ -51,7 +51,6 @@ typedef struct {
   const uint8_t channelCount;
 } hal_gpio_config_S;
 
-// Contains all chip init code.
 hal_error_E hal_gpio_init(hal_gpio_config_S const *const config);
 
 hal_gpio_pinState_E hal_gpio_readInputState(hal_gpio_channel_E channel);
