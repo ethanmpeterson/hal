@@ -8,7 +8,9 @@
 #include "hal_uart.h"
 #include "hal_uart_microSpecific.h"
 
-#define DEV_CONSOLE_MAX_COMMAND_LENGTH 255
+#define DEV_CONSOLE_MAX_COMMAND_LENGTH 50
+#define DEV_CONSOLE_MAX_COMMAND_ARGS   5
+#define DEV_CONSOLE_MAX_ARG_LENGTH     50
 
 #ifdef __cplusplus
 extern "C" {
@@ -26,7 +28,7 @@ typedef struct {
 
 typedef struct {
   // The UART channel used to collect and parse command strings
-  hal_uart_channel_E consolePort;
+  const hal_uart_channel_E consolePort;
 
   // Lookup table of the command callbacks to parse strings
   dev_console_command_S const * const commands;
@@ -40,24 +42,14 @@ hal_error_E dev_console_init(dev_console_config_S const *const config);
 // typing it into the console
 hal_error_E dev_console_processCommandString(char *commandString);
 
-// Used to collect one character at a time in an internal buffer. Once a newline
-// is reached, the string is ready to be processed as a command. Separate
-// functions will be used to check if a command is ready to be processed outside
-// of interrupt context
-hal_error_E dev_console_collectCharFromISR(char c);
-
 // Returns true if a complete command is available in the module's internal buffer
 // New commands will not be collected or processed until this is cleared.
 // Will not support any queuing functionality for now.
 bool dev_console_isCommandReady(void);
-
-// Processes a command if one is available in the buffer. It will clear the
-// command ready flag once called. Returns an error if the command itself fails
-// or there is command ready
-hal_error_E dev_console_processCommand(void);
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
 
 #endif /* DEV_CONSOLE_H */
+
