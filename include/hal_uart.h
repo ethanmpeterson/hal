@@ -15,6 +15,7 @@ extern "C" {
     hal_error_E (*initChannel)(void);
     hal_error_E (*sendByte)(uint8_t data);
     hal_error_E (*receiveByte)(uint8_t *data);
+
   } hal_uart_channelConfig_S;
 
   typedef struct {

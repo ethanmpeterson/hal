@@ -8,6 +8,7 @@
 #include "hal_rtc.h"
 #include "dev_alarm_microSpecific.h"
 
+
 #ifdef __cplusplus
 extern "C" {
 #endif
