@@ -42,10 +42,8 @@ hal_error_E dev_console_init(dev_console_config_S const *const config);
 // typing it into the console
 hal_error_E dev_console_processCommandString(char *commandString);
 
-// Returns true if a complete command is available in the module's internal buffer
-// New commands will not be collected or processed until this is cleared.
-// Will not support any queuing functionality for now.
-bool dev_console_isCommandReady(void);
+// Parsing Utility Methods
+hal_error_E dev_console_parseDecimalDigit(char *token, uint32_t *word);
 
 #ifdef __cplusplus
 }

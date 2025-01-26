@@ -66,12 +66,54 @@ hal_error_E dev_console_processCommandString(char *commandString) {
     }
   }
 
-  char **arg = (char **)(&data->commandTokens[1]);
+  // Needs to be done to avoid cast alignment warning
+  // This will cause an unbounded stack usage warning since we don't know the
+  // size of token count. So instead we just always make our args array the max
+  // possible length
+  char *arg[DEV_CONSOLE_MAX_COMMAND_ARGS];
+  for (uint32_t i = 1; i < tokenCount; i++) {
+    arg[i - 1] = data->commandTokens[i];
+  }
+
   if (data->config->commands[i].callback(arg, tokenCount - 1) == HAL_ERROR_OK) {
     hal_uart_sendString(data->config->consolePort, "PASS\n");
   } else {
     hal_uart_sendString(data->config->consolePort, "ERROR\n");
     ret = HAL_ERROR_ERR;
+  }
+
+  return ret;
+}
+
+hal_error_E dev_console_parseDecimalDigit(char *token, uint32_t *word) {
+  // Input sanity
+  if (word == NULL || token == NULL) {
+    return HAL_ERROR_ERR;
+  }
+
+  hal_error_E ret = HAL_ERROR_OK;
+
+  *word = 0;
+  uint32_t numberLength = strlen(token);
+  for (uint32_t i = 0; i < numberLength; i++) {
+    char digit = token[i];
+
+    // Check that we have a valid ASCII digit
+    if (digit >= '0' && digit <= '9') {
+      // Do stuff
+      uint8_t digitVal = digit - '0';
+      uint32_t digitPos = numberLength - 1 - i;
+      if (digitPos == 0) {
+        // Handle units digit case
+        *word += digitVal;
+      } else {
+        *word += 10 * (numberLength - 1 - i) * digitVal;
+      }
+    } else {
+      // Invalid digit, set error code and exit
+      ret = HAL_ERROR_ERR;
+      break;
+    }
   }
 
   return ret;
@@ -108,7 +150,7 @@ static hal_error_E dev_console_private_parseCommand(uint32_t *tokenCount) {
   uint32_t tokenLength = strlen(data->commandTokens[tokNum - 1]);
   if (data->commandTokens[tokNum - 1][tokenLength - 1] == '\n') {
     // Replace the newline with null termination
-    data->commandTokens[tokNum][tokenLength] = '\0';
+    data->commandTokens[tokNum - 1][tokenLength - 1] = '\0';
   } else {
     ret = HAL_ERROR_ERR;
   }

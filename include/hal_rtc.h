@@ -12,6 +12,7 @@ typedef struct {
   uint8_t year; // interpreted as 20XX
   uint8_t month;
   uint8_t day;
+  // 1 == Monday, 2 == Tuesday etc.
   uint8_t weekday;
   uint8_t hour;
   uint8_t minute;

@@ -4,8 +4,9 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "hal.h"
 #include "hal_rtc.h"
-/* #include "dev_alarm_microSpecific.h" */
+#include "dev_alarm_microSpecific.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -19,38 +20,42 @@ extern "C" {
 // dev_alarm can also use hal_microspecific functions to utilize alarms within
 // the HW if applicable
 
-  typedef enum {
-    DEV_ALARM_STATUS_ACTIVE,
-    DEV_ALARM_STATUS_INACTIVE,
+typedef enum {
+  DEV_ALARM_STATUS_ACTIVE,
+  DEV_ALARM_STATUS_INACTIVE,
+  DEV_ALARM_STATUS_COUNT,
+  DEV_ALARM_STATUS_UNKNOWN,
+} dev_alarm_status_E;
 
-    DEV_ALARM_STATUS_COUNT,
-    DEV_ALARM_STATUS_UNKNOWN,
-  } dev_alarm_status_E;
+typedef struct {
+  // 24 hour time
+  uint8_t hour;
+  uint8_t minute;
 
-  typedef struct {
-    uint8_t hour;
-    uint8_t minute;
-    uint8_t second;
+  // bitmask for what weekdays the alarm is enabled
+  // Bit 0 represents Monday, bit 1 Tuesday etc. Bit 7 is unused
+  uint8_t weekdayMask;
+} dev_alarm_timeStamp_S;
 
-    // bitmask for what weekdays the alarm is enabled
-    uint8_t weekdayMask;
-  } dev_alarm_timeStamp_S;
+// Each channel represents an alarm, each channel will have its own state but
+// they will share a single hal_rtc reference time
+typedef struct {
+  dev_alarm_timeStamp_S alarmTime;
+  // Optional callback that is called once on alarm activation
+  void (*callback)(void);
+} dev_alarm_channelConfig_S;
 
-  typedef struct {
-    /* void (*initAlarmChannel)(void); */
+typedef struct {
+  dev_alarm_channelConfig_S const * const channels;
+} dev_alarm_config_S;
 
-  } dev_alarm_channelConfig_S;
+hal_error_E dev_alarm_init(dev_alarm_config_S const *const config);
 
-  typedef struct {
-  } dev_alarm_config_S;
+dev_alarm_status_E dev_alarm_getStatus(dev_alarm_channel_E channel);
+hal_error_E dev_alarm_setStatus(dev_alarm_channel_E channel, dev_alarm_status_E status);
 
-  void dev_alarm_init(dev_alarm_config_S const *const config);
-
-  /* void dev_alarm_getAlarmStatus(dev_alarm_channel_E channel); */
-
-  // TODO:
-  // Set alarm active function (can be used in ISRs for HW alarms)
-  // clear alarm active function (used in application to dismiss the alarm when applicable)
+// Called in a loop to run and update the state machine
+void dev_alarm_runLoop(void);
 
 #ifdef __cplusplus
 }

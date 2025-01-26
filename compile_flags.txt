@@ -1,3 +1,4 @@
 -I../../src/hal
+-I../../src/dev
 -Iinclude/dev
 -Iinclude
