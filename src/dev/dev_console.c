@@ -91,7 +91,7 @@ hal_error_E dev_console_parseDecimalDigit(char *token, uint32_t *word) {
     return HAL_ERROR_ERR;
   }
 
-  hal_error_E ret = HAL_ERROR_OK;
+  hal_error_E ret = HAL_ERROR_ERR;
 
   *word = 0;
   uint32_t numberLength = strlen(token);
@@ -109,6 +109,7 @@ hal_error_E dev_console_parseDecimalDigit(char *token, uint32_t *word) {
       } else {
         *word += 10 * (numberLength - 1 - i) * digitVal;
       }
+      ret = HAL_ERROR_OK;
     } else {
       // Invalid digit, set error code and exit
       ret = HAL_ERROR_ERR;

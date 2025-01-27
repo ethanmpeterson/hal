@@ -46,6 +46,16 @@ dev_alarm_status_E dev_alarm_getStatus(dev_alarm_channel_E channel) {
   return ret;
 }
 
+hal_error_E dev_alarm_getAlarmTimeStamp(dev_alarm_channel_E channel, dev_alarm_timeStamp_S *timeStamp) {
+  if (channel >= DEV_ALARM_CHANNEL_COUNT || timeStamp == NULL) {
+    return HAL_ERROR_ERR;
+  }
+
+  *timeStamp = data->config->channels[channel].alarmTime;
+
+  return HAL_ERROR_OK;
+}
+
 hal_error_E dev_alarm_setStatus(dev_alarm_channel_E channel, dev_alarm_status_E status) {
   hal_error_E ret = HAL_ERROR_ERR;
   if (channel < DEV_ALARM_CHANNEL_COUNT) {
