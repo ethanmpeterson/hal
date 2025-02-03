@@ -56,6 +56,7 @@ dev_alarm_status_E dev_alarm_getStatus(dev_alarm_channel_E channel);
 hal_error_E dev_alarm_setStatus(dev_alarm_channel_E channel, dev_alarm_status_E status);
 
 hal_error_E dev_alarm_getAlarmTimeStamp(dev_alarm_channel_E channel, dev_alarm_timeStamp_S *timeStamp);
+hal_error_E dev_alarm_setAlarmTimeStamp(dev_alarm_channel_E channel, dev_alarm_timeStamp_S *timeStamp);
 
 // Called in a loop to run and update the state machine
 void dev_alarm_runLoop(void);

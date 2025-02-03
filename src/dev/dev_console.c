@@ -25,6 +25,9 @@ static dev_console_data_S * const data = &dev_console_data;
 static hal_error_E dev_console_private_parseCommand(uint32_t *tokenCount);
 static void dev_console_private_clearBuffers(void);
 
+// Raises 10 to the given exponent, C math lib uses too much flash
+static uint32_t dev_console_private_pow10(uint32_t exp);
+
 hal_error_E dev_console_init(dev_console_config_S const *const config) {
   memset(data, 0U, sizeof(dev_console_data_S));
   dev_console_private_clearBuffers();
@@ -103,12 +106,7 @@ hal_error_E dev_console_parseDecimalDigit(char *token, uint32_t *word) {
       // Do stuff
       uint8_t digitVal = digit - '0';
       uint32_t digitPos = numberLength - 1 - i;
-      if (digitPos == 0) {
-        // Handle units digit case
-        *word += digitVal;
-      } else {
-        *word += 10 * (numberLength - 1 - i) * digitVal;
-      }
+      *word += dev_console_private_pow10(digitPos) * digitVal;
       ret = HAL_ERROR_OK;
     } else {
       // Invalid digit, set error code and exit
@@ -162,4 +160,13 @@ static hal_error_E dev_console_private_parseCommand(uint32_t *tokenCount) {
 static void dev_console_private_clearBuffers(void) {
   memset((void *)data->commandBuffer, 0U, sizeof(data->commandBuffer));
   memset((void *)data->commandTokens, 0U, sizeof(data->commandTokens));
+}
+
+static uint32_t dev_console_private_pow10(uint32_t exp) {
+  uint32_t res = 1;
+  for (uint32_t i = 0; i < exp; i++) {
+    res *= 10;
+  }
+
+  return res;
 }
