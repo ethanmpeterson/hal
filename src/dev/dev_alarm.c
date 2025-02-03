@@ -13,7 +13,12 @@
 
 typedef struct {
   dev_alarm_config_S const *config;
+
+  // Stores the ACTIVE/INACTIVE statuses of each alarm
   dev_alarm_status_E channelStatuses[DEV_ALARM_CHANNEL_COUNT];
+
+  // Stores the alarm time of each channel, changeable in the system console
+  dev_alarm_timeStamp_S channelTimes[DEV_ALARM_CHANNEL_COUNT];
 } dev_alarm_data_S;
 
 static dev_alarm_data_S dev_alarm_data;
@@ -28,8 +33,15 @@ static bool dev_alarm_private_isTimeStampEqual(dev_alarm_timeStamp_S alarmTime);
 hal_error_E dev_alarm_init(dev_alarm_config_S const *const config) {
   memset(data, 0U, sizeof(dev_alarm_data_S));
   memset(data->channelStatuses, DEV_ALARM_STATUS_INACTIVE, sizeof(data->channelStatuses));
+  memset(data->channelTimes, DEV_ALARM_STATUS_INACTIVE, sizeof(data->channelTimes));
+
   if (config == NULL) {
     return HAL_ERROR_ERR;
+  }
+
+  // Copy over the alarm times into modifiable data structure
+  for (uint32_t i = 0; i < DEV_ALARM_CHANNEL_COUNT; i++) {
+    data->channelTimes[i] = config->channels[i].alarmTime;
   }
 
   data->config = config;
@@ -51,7 +63,17 @@ hal_error_E dev_alarm_getAlarmTimeStamp(dev_alarm_channel_E channel, dev_alarm_t
     return HAL_ERROR_ERR;
   }
 
-  *timeStamp = data->config->channels[channel].alarmTime;
+  *timeStamp = data->channelTimes[channel];
+
+  return HAL_ERROR_OK;
+}
+
+hal_error_E dev_alarm_setAlarmTimeStamp(dev_alarm_channel_E channel, dev_alarm_timeStamp_S *timeStamp) {
+  if (channel >= DEV_ALARM_CHANNEL_COUNT || timeStamp == NULL) {
+    return HAL_ERROR_ERR;
+  }
+
+  data->channelTimes[channel] = *timeStamp;
 
   return HAL_ERROR_OK;
 }
