@@ -42,7 +42,7 @@ hal_error_E dev_wifi_processCommandArray(uint8_t *commandArray, uint8_t arrLen) 
         return HAL_ERROR_ERR;
     }
     dev_wifi_private_clearBuffers();
-    (void)memcpy((uint8_t *)data->commandBuffer, commandArray, arrLen);
+    (void)memcpy(data->commandBuffer, commandArray, arrLen);
 
     uint8_t i;
     for (i = 0; i < data->config->commandCount; i++) {
@@ -51,7 +51,13 @@ hal_error_E dev_wifi_processCommandArray(uint8_t *commandArray, uint8_t arrLen) 
         }
     }
 
-    if (data->config->commands[i].callback(data->commandBuffer, arrLen) == HAL_ERROR_OK) {
+    // Needs to be done to avoid cast alignment warning
+    uint8_t arg[DEV_WIFI_MAX_COMMAND_ARGS];
+    for (uint8_t i = 0; i < arrLen; i++) {
+        arg[i] = data->commandBuffer[i];
+    }
+
+    if (data->config->commands[i].callback(arg, arrLen) == HAL_ERROR_OK) {
         // Send OK back to ESP
     } else {
         // Send ERR back to ESP

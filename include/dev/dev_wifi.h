@@ -36,8 +36,8 @@ typedef struct {
     
     // function pointer to the code that processes the command,
     // the callback is called with an array of arguments and the number of args.
-    // The array of arguments includes everything after the ID. For example if the id was 1 and you sen the command "1 x y", the arg array would be ["x", "y"] and args would be 2.
-    hal_error_E (*callback)(char **arg, uint32_t args);
+    // The array of arguments includes everything including the ID.
+    hal_error_E (*callback)(uint8_t *args, uint8_t argsLen);
 } dev_wifi_command_S;
 
 typedef struct {
@@ -50,6 +50,7 @@ typedef struct {
 } dev_wifi_config_S;
 
 hal_error_E dev_wifi_init(dev_wifi_config_S const *const config);
+hal_error_E dev_wifi_processCommandArray(uint8_t *commandArray, uint8_t arrLen);
 
 #ifdef __cplusplus
 }
