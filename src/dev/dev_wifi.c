@@ -10,9 +10,7 @@
 
 typedef struct {
 
-    char commandBuffer[DEV_WIFI_MAX_COMMAND_LENGTH];
-
-    char commandTokens[DEV_WIFI_MAX_COMMAND_ARGS][DEV_WIFI_MAX_ARG_LENGTH];
+    uint8_t commandBuffer[DEV_WIFI_MAX_COMMAND_LENGTH];
 
     dev_wifi_config_S const * config;
 
@@ -20,6 +18,8 @@ typedef struct {
 
 static dev_wifi_data_S dev_wifi_data;
 static dev_wifi_data_S * const data = &dev_wifi_data;
+
+static void dev_wifi_private_clearBuffers(void);
 
 hal_error_E dev_wifi_init(dev_wifi_config_S const *const config) {
     memset(data, 0U, sizeof(dev_wifi_data_S));
@@ -33,69 +33,34 @@ hal_error_E dev_wifi_init(dev_wifi_config_S const *const config) {
     return HAL_ERROR_OK;
 }
 
-// Array should start with a unique beginning and ending byte. This is to ensure it is receiving a full command
-hal_error_E dev_wifi_processCommandArray(uint8_t *commandArray) {
+// Need to adjust to ensure data is being passed properly
+hal_error_E dev_wifi_processCommandArray(uint8_t *commandArray, uint8_t arrLen) {
 
-    switch(commandArray[0]) {
-        case DEV_WIFI_COMMAND_SET_TIME:
-            dev_wifi_setTime(commandArray);
-            break;
+    hal_error_E ret;
 
-        case DEV_WIFI_COMMAND_GET_TIME:
-            dev_wifi_getTime();
-            break;
-        
-        case DEV_WIFI_COMMAND_GET_ALARMS:
-            dev_wifi_getAlarms();
-            break;
-
-        case DEV_WIFI_COMMAND_REMOVE_ALARM:
-            dev_wifi_removeAlarm(commandArray);
-            break;
-
-        case DEV_WIFI_COMMAND_SET_ALARM:
-            dev_wifi_setAlarm(commandArray);
-            break;
-        
-        default:
-            return HAL_ERROR_ERR;
-            break;
+    if (arrLen >= DEV_WIFI_MAX_COMMAND_LENGTH) {
+        return HAL_ERROR_ERR;
     }
-}
+    dev_wifi_private_clearBuffers();
+    (void)memcpy((uint8_t *)data->commandBuffer, commandArray, arrLen);
 
-// Set time sent from wifi board
-static hal_error_E dev_wifi_setTime(uint8_t *commandArray) {
+    uint8_t i;
+    for (i = 0; i < data->config->commandCount; i++) {
+        if(data->config->commands[i].id == data->commandBuffer[0]) {
+            break;
+        }
+    }
 
-    //Create the structure to pass to the hal_rtc function to set the time
-    hal_rtc_time_S timeToSet = {
-        .year = commandArray[1],
-        .month = commandArray[2],
-        .day = commandArray[3],
-
-        .weekday = commandArray[4],
-        .hour = commandArray[5],
-        .minute = commandArray[6],
-        .seconds = commandArray[7]
-    };
-
-    hal_error_E ret = hal_rtc_setTime(&timeToSet);
-
+    if (data->config->commands[i].callback(data->commandBuffer, arrLen) == HAL_ERROR_OK) {
+        // Send OK back to ESP
+    } else {
+        // Send ERR back to ESP
+        ret = HAL_ERROR_ERR;
+    }
     return ret;
-}
-
-//Fill in the rest of these functions on each of their own branches
-static hal_error_E dev_wifi_getTime(void) {
 
 }
 
-static hal_error_E dev_wifi_getAlarms(void) {
-
-}
-
-static hal_error_E dev_wifi_removeAlarm(uint8_t *commandArray) {
-
-}
-
-static hal_error_E dev_wifi_setAlarm(uint8_t *commandArray) {
-
+static void dev_wifi_private_clearBuffers(void) {
+    memset((void *)data->commandBuffer, 0U, sizeof(data->commandBuffer));
 }

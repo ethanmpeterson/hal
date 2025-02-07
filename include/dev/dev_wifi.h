@@ -11,6 +11,7 @@
 #define DEV_WIFI_MAX_COMMAND_LENGTH 7
 #define DEV_WIFI_MAX_COMMAND_ARGS   6
 #define DEV_WIFI_MAX_ARG_LENGTH     1
+#define DEV_WIFI_COMMAND_END        4
 
 #ifdef __cplusplus
 extern "C" {
@@ -49,12 +50,6 @@ typedef struct {
 } dev_wifi_config_S;
 
 hal_error_E dev_wifi_init(dev_wifi_config_S const *const config);
-
-static hal_error_E dev_wifi_setTime(uint8_t *commandArray);
-static hal_error_E dev_wifi_getTime(void);
-static hal_error_E dev_wifi_getAlarms(void);
-static hal_error_E dev_wifi_removeAlarm(uint8_t *commandArray);
-static hal_error_E dev_wifi_setAlarm(uint8_t *commandArray);
 
 #ifdef __cplusplus
 }
