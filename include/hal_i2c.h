@@ -32,6 +32,9 @@ extern "C" {
     hal_error_E hal_i2c_sendData(hal_i2c_channel_E channel, uint16_t address, uint8_t* data, uint8_t nBytes);
     hal_error_E hal_i2c_receiveData(hal_i2c_channel_E channel, uint16_t address, uint8_t* data, uint8_t nBytes);
     hal_error_E hal_i2c_IRQHandler(hal_i2c_channel_E);
+    hal_error_E hal_i2c_data_transfer_complete(hal_i2c_channel_E channel);
+    hal_error_E hal_i2c_transmit_next_byte(hal_i2c_channel_E channel);
+    hal_error_E hal_i2c_receive_next_byte(hal_i2c_channel_E channel);
 
     
     typedef enum {

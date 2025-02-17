@@ -70,25 +70,36 @@ hal_error_E hal_i2c_data_transfer_complete(hal_i2c_channel_E channel) {
         config_data->config->channels[channel].endTransmission();
 
     }
+
+    // Figure out error checking implementation for transfer completion
+    return HAL_ERROR_OK;
 }
 
 hal_error_E hal_i2c_begin_send(hal_i2c_channel_E channel, uint16_t address, uint8_t nBytes) {
+    hal_error_E ret;
     config_data->isSending[channel] = true;
-    config_data->config->channels[channel].beginSend(address, nBytes);   
+    ret = config_data->config->channels[channel].beginSend(address, nBytes);
+    return ret;
 }
 
 hal_error_E hal_i2c_begin_receive(hal_i2c_channel_E channel, uint16_t address, uint8_t nBytes, uint8_t* returnAddress) {
+    hal_error_E ret;
     config_data->isReceiving[channel] = true;
     config_data->receiveAddress[channel] = returnAddress;
-    config_data->config->channels[channel].beginReceive(address, nBytes);
+    ret = config_data->config->channels[channel].beginReceive(address, nBytes);
+    return ret;
 }
 
 hal_error_E hal_i2c_receive_next_byte(hal_i2c_channel_E channel) {
-    config_data->config->channels[channel].receiveNextByte(&config_data->receiveData[channel][config_data->dataIndex[channel]]);
+    hal_error_E ret;
+    ret = config_data->config->channels[channel].receiveNextByte(config_data->receiveData[channel][config_data->dataIndex[channel]]);
     config_data->dataIndex[channel]++;
+    return ret;
 }
 
 hal_error_E hal_i2c_transmit_next_byte(hal_i2c_channel_E channel) {
-    config_data->config->channels[channel].sendNextByte(config_data->sendData[channel][config_data->dataIndex[channel]]);
+    hal_error_E ret;
+    ret = config_data->config->channels[channel].sendNextByte(config_data->sendData[channel][config_data->dataIndex[channel]]);
     config_data->dataIndex[channel]++;
+    return ret;
 }
